@@ -7,14 +7,15 @@ import os
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
+# Chooses the location of the
 file_list = os.listdir(r"C:\Users\giorg\Desktop\soccer") 
 print(file_list)
 
-epl2018 = pd.read_csv(input("Choose league:")) # choose the .csv file
+epl2018 = pd.read_csv(input("Choose league:")) # choose the .csv file         
 epl2018 = epl2018[['Home','Away','HG','AG',]] #choose the colum names as writen in the .csv file
 epl2018 = epl2018.rename(columns={'HG':'HomeGoals', 'AG':'AwayGoals'}) # rename the colums
 
-#Drops the last 10 matches
+#Drops the last 10 matches 
 #epl2018 = epl2018[:-10]
 
 
@@ -29,19 +30,12 @@ poisson_model = smf.glm(formula = "goals ~ home + team + opponent", data=goal_mo
 #prints a sumamry of the data
 print(poisson_model.summary())
 
-# prediction for home team goals scored for specific oponet
-#print(poisson_model.predict(pd.DataFrame(data={'team':'Chelsea', 'opponent': 'Arsenal', 'home':1}, index=[1] )))
-
-#prediction for away teams goal scored for selected opponent
-#print(poisson_model.predict(pd.DataFrame(data={'team':'Arsenal', 'opponent': 'Chelsea', 'home':0}, index=[1])))
-
 def simulate_match(foot_model, homeTeam, awayTeam, max_goals=10):
 	home_goals_avg = foot_model.predict(pd.DataFrame(data={'team':homeTeam, 'opponent': awayTeam,'home':1},index=[1])).values[0]
 	away_goals_avg = foot_model.predict(pd.DataFrame(data={'team':awayTeam, 'opponent': homeTeam, 'home':0},index=[1])).values[0]
 
 	team_pred = [[poisson.pmf(i, team_avg) for i in range(0, max_goals+1)] for team_avg in[home_goals_avg, away_goals_avg]]
 	return(np.outer(np.array(team_pred[0]), np.array(team_pred[1])))
-#print(simulate_match(poisson_model, 'Tromso', 'Rosenborg', max_goals=5)) # Prints the simulation array of goals
 
 homelist = []
 print("Enter the home team names, when finished type 'end'")
